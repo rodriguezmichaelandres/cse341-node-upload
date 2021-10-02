@@ -37,11 +37,15 @@ main {
     align-items: center;
 }
 
-.main-header_item a:hover,
+.main-header_item a:hover{
+    color: yellow;
+}
 .main-header_item a:active,
-.main-header_item a.active {
+.main-header_item a.active{
     color: purple;
 }
+
+
 
 .product_title {
     color: blue;
@@ -60,4 +64,23 @@ img{
     width: auto; 
     max-width: 300px; 
     max-height: 300px;
+}
+
+.centered{
+    text-align: center;
+}
+
+.btn {
+    font: inherit;
+    border: 1px solid #00695c;
+    color: #00695c;
+    background: white;
+    border-radius: 3px;
+    cursor: pointer;
+  }
+
+  a.btn {
+    font-size:1.1em;
+    text-decoration: none;
+    padding: 0.2em;
 }
