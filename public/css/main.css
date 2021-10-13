@@ -33,8 +33,10 @@ main {
 
 .main-header_nav {
     height: 100%;
+    width: 98%;
     display: flex;
     align-items: center;
+    justify-content: space-between;
 }
 
 .main-header_item a:hover{
