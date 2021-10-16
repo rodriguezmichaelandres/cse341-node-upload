@@ -20,7 +20,9 @@
             <%= product.rating %>
         </h5>
 
-        <%- include('../includesProve/add-to-cart.ejs') %>
+        <% if (isAuthenticated) { %>
+            <%- include('../includesProve/add-to-cart.ejs', {product: product}) %>
+        <% } %>
         
     </main>
     <%- include('../includesProve/end.ejs') %>

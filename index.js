@@ -4,12 +4,24 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const mongoose = require('mongoose');
 const PORT = process.env.PORT || 5000;
-
+const session = require('express-session');
+const MongoDBStore = require('connect-mongodb-session')(session)
+const csrf = require('csurf')
+const flash = require('connect-flash')
 
 const errorController = require('./controllers/error');
 const User = require('./models/user');
 
+const MONGODB_IRL ='mongodb+srv://andresrodrock:200694@testcluster.h472u.mongodb.net/shop?retryWrites=true&w=majority'
+
 const app = express();
+const store = new MongoDBStore({
+  uri: MONGODB_IRL,
+  collection: 'sessions'
+});
+const csrfProtection = csrf()
+app.use(flash());
+
 
 app.set('view engine', 'ejs');
 app.set('views', 'views');
@@ -22,14 +34,32 @@ const authRoutes = require('./routes/auth');
 
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(express.static(path.join(__dirname, 'public')));
+app.use(session(
+  {
+    secret: 'my secret', 
+    resave: false, 
+    saveUninitialized: false, 
+    store: store
+  })
+);
+app.use(csrfProtection);
 
 app.use((req, res, next) => {
-  User.findById('6160c4b897483de5a38819e0')
-    .then(user => {
-      req.user = user;
-      next();
-    })
-    .catch(err => console.log(err));
+  if(!req.session.user) {
+    return next()
+  }
+  User.findById(req.session.user._id)
+  .then(user => {
+    req.user = user;
+    next();
+  })
+  .catch(err => console.log(err));
+});
+
+app.use((req, res, next) => {
+  res.locals.isAuthenticated = req.session.isLoggedIn;
+  res.locals.csrfToken = req.csrfToken();
+  next();
 });
 
 app.use('/prove02', mainRoutes)
@@ -43,22 +73,10 @@ app.use(errorController.get404);
 app.listen(PORT, () => console.log(`Listening on ${PORT}`));
 
 mongoose
-  .connect('mongodb+srv://andresrodrock:200694@testcluster.h472u.mongodb.net/shop?retryWrites=true&w=majority')
+  .connect(MONGODB_IRL)
   .then(result =>{
-    User.findOne().then(user => {
-      if(!user){
-        const user = new User({
-          name: 'Max',
-          email: 'a@a.com',
-          cart: {
-            items: []
-          }
-        })
-        user.save()
-      }
-    })
-
     app.listen(3000);
-  }).catch(err => {
+  })
+  .catch(err => {
     console.log(err);
   });
